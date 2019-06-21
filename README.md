@@ -4,7 +4,7 @@ At [Dyne.org](https://dyne.org), we maintain a [public Tech Radar](https://tech-
 
 This repository contains the code to generate the visualization: [`radar.js`](/docs/radar.js) (based on [d3.js v4](https://d3js.org)).  Feel free to use and adapt it for your own purposes.
 
-This visualization is a fork of [Zalando's tech radar](https://github.com/zalando/tech-radar) with which we share the form, but not the contents.
+This visualization is a fork of [Zalando's tech radar](https://github.com/zalando/tech-radar) which is inspired by the original [Thoughtworks tech radar](https://www.thoughtworks.com/radar). We share the form of the first, but not the contents of any of them.
 
 ## Usage
 
