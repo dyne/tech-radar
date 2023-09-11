@@ -245,9 +245,10 @@ function radar_visualization(config) {
         .text(config.rings[i].name)
         .attr("y", -rings[i].radius + 62)
         .attr("text-anchor", "middle")
-        .style("fill", "#e5e5e5")
+        .style("fill", config.rings[i].color)
+        .style("opacity", 0.35)
         .style("font-family", "Arial, Helvetica")
-        .style("font-size", 42)
+        .style("font-size", "42px")
         .style("font-weight", "bold")
         .style("pointer-events", "none")
         .style("user-select", "none");
@@ -255,7 +256,7 @@ function radar_visualization(config) {
   }
 
   function legend_transform(quadrant, ring, index=null) {
-    var dx = ring < 2 ? 0 : 120;
+    var dx = ring < 2 ? 0 : 140;
     var dy = (index == null ? -16 : index * 12);
     if (ring % 2 === 1) {
       dy = dy + 36 + segmented[quadrant][ring-1].length * 12;
@@ -267,14 +268,24 @@ function radar_visualization(config) {
   }
 
   // draw title and legend (only in print layout)
-  if (true) { // config.print_layout) {
+  if (config.print_layout) {
 
     // title
     radar.append("text")
       .attr("transform", translate(title_offset.x, title_offset.y))
       .text(config.title)
       .style("font-family", "Arial, Helvetica")
-      .style("font-size", "34");
+      .style("font-size", "30")
+      .style("font-weight", "bold")
+
+    // date
+    radar
+      .append("text")
+      .attr("transform", translate(title_offset.x, title_offset.y + 20))
+      .text(config.date || "")
+      .style("font-family", "Arial, Helvetica")
+      .style("font-size", "14")
+      .style("fill", "#999")
 
     // footer
     radar.append("text")
@@ -282,7 +293,7 @@ function radar_visualization(config) {
       .text("▲ moved up     ▼ moved down")
       .attr("xml:space", "preserve")
       .style("font-family", "Arial, Helvetica")
-      .style("font-size", "10");
+      .style("font-size", "10px");
 
     // legend
     var legend = radar.append("g");
@@ -294,24 +305,34 @@ function radar_visualization(config) {
         ))
         .text(config.quadrants[quadrant].name)
         .style("font-family", "Arial, Helvetica")
-        .style("font-size", "18");
+        .style("font-size", "18px")
+        .style("font-weight", "bold");
       for (var ring = 0; ring < 4; ring++) {
         legend.append("text")
           .attr("transform", legend_transform(quadrant, ring))
           .text(config.rings[ring].name)
           .style("font-family", "Arial, Helvetica")
-          .style("font-size", "12")
-          .style("font-weight", "bold");
+          .style("font-size", "12px")
+          .style("font-weight", "bold")
+          .style("fill", config.rings[ring].color);
         legend.selectAll(".legend" + quadrant + ring)
           .data(segmented[quadrant][ring])
           .enter()
+            .append("a")
+              .attr("href", function (d, i) {
+                 return d.link ? d.link : "#"; // stay on same page if no link was provided
+              })
+              // Add a target if (and only if) there is a link and we want new tabs
+              .attr("target", function (d, i) {
+                 return (d.link && config.links_in_new_tabs) ? "_blank" : null;
+              })
             .append("text")
               .attr("transform", function(d, i) { return legend_transform(quadrant, ring, i); })
               .attr("class", "legend" + quadrant + ring)
               .attr("id", function(d, i) { return "legendItem" + d.id; })
               .text(function(d, i) { return d.id + ". " + d.label; })
               .style("font-family", "Arial, Helvetica")
-              .style("font-size", "11")
+              .style("font-size", "11px")
               .on("mouseover", function(d) { showBubble(d); highlightLegendItem(d); })
               .on("mouseout", function(d) { hideBubble(d); unhighlightLegendItem(d); });
       }
@@ -393,9 +414,13 @@ function radar_visualization(config) {
     var blip = d3.select(this);
 
     // blip link
-    if (!config.print_layout && d.active && d.hasOwnProperty("link")) {
+    if (d.active && Object.prototype.hasOwnProperty.call(d, "link") && d.link) {
       blip = blip.append("a")
         .attr("xlink:href", d.link);
+
+      if (config.links_in_new_tabs) {
+        blip.attr("target", "_blank");
+      }
     }
 
     // blip shape
@@ -422,7 +447,7 @@ function radar_visualization(config) {
         .attr("text-anchor", "middle")
         .style("fill", "#fff")
         .style("font-family", "Arial, Helvetica")
-        .style("font-size", function(d) { return blip_text.length > 2 ? "8" : "9"; })
+        .style("font-size", function(d) { return blip_text.length > 2 ? "8px" : "9px"; })
         .style("pointer-events", "none")
         .style("user-select", "none");
     }
